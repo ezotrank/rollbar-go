@@ -1,4 +1,4 @@
-module github.com/rollbar/rollbar-go
+module github.com/ezotrank/rollbar-go
 
 go 1.13
 

@@ -32,7 +32,8 @@ const (
 
 var (
 	hostname, _ = os.Hostname()
-	std         = NewAsync("", "development", "", hostname, "")
+	// Set global transport as sync to prevent goleak
+	std         = NewSync("", "development", "", hostname, "")
 	nilErrTitle = "<nil>"
 )
 
@@ -88,6 +89,11 @@ var DefaultStackTracer StackTracerFunc = func(err error) ([]runtime.Frame, bool)
 	}
 
 	return nil, false
+}
+
+// SetDefaultAsyncTransport sets global transport as Async.
+func SetDefaultAsyncTransport() {
+	std = NewAsync(std.Token(), std.Environment(), std.CodeVersion(), std.ServerHost(), std.ServerRoot())
 }
 
 // SetTelemetry sets the telemetry
@@ -455,7 +461,7 @@ func Log(level string, interfaces ...interface{}) {
 		case context.Context:
 			ctx = val
 		default:
-			rollbarError(std.Transport.(*AsyncTransport).Logger, "Unknown input type: %T", val)
+			rollbarError(std.Transport.(*SyncTransport).Logger, "Unknown input type: %T", val)
 		}
 	}
 	if !skipSet {
